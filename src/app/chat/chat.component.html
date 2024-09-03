@@ -1,5 +1,5 @@
 <div class="container">
-    <h1>Hi, {{user.username}}</h1>
+    <h1>Hi, {{ user.username }}</h1>
     <button (click)="backLogin()">Back to Login</button>
 
     <form>
@@ -8,28 +8,32 @@
             <input type="text" [(ngModel)]="messageContent" name="messageContent" id="messageContent"
                 class="form-control" />
         </div>
-
         <div class="form-group">
-            <button *ngIf="isinRoom" (click)="chat()" class="btn">Chat</button>
-            <button *ngIf="isinRoom" (click)="leaveroom()" class="btn">Leave</button>
-            <button *ngIf="!isinRoom" (click)="joinroom()" class="btn">Join</button>
+            <button *ngIf="isinRoom" (click)="chat()" class="btn btn-primary">Chat</button>&nbsp;
+            <button *ngIf="!isinRoom" (click)="joinroom()" class="btn btn-primary">Join</button>&nbsp;
+            <button *ngIf="isinRoom" (click)="leaveroom()" class="btn btn-primary">Leave</button>
         </div>
-
         <select [(ngModel)]="roomslist" name="roomslist">
             <option [ngValue]="null">Select Room</option>
             <option *ngFor="let room of rooms">{{ room }}</option>
-        </select>
-
+        </select><br /><br />
         <div *ngIf="canCreateGroup">
             <label for="newroom">New Room</label>
             <input type="text" [(ngModel)]="newroom" name="newroom" id="newroom" class="form-control" />
-            <button (click)="createroom()" class="btn">Create New Room</button>
+            <button (click)="createroom()" class="btn btn-primary">Create New Room</button>
         </div>
     </form>
 
-    <h3>Notices</h3>
-    <button (click)="clearnotice()" class="btn">Clear Notice</button>
+    <!-- Room List Section -->
+    <div class="room-list">
+        <h3>Available Rooms</h3>
+        <ul>
+            <li *ngFor="let room of rooms" (click)="roomslist = room">{{ room }}</li>
+        </ul>
+    </div>
 
+    <h3>Notices</h3>
+    <button (click)="clearnotice()" class="btn btn-primary">Clear Notice</button><br />
     <h3>Chat Message for {{ currentroom }} - {{ numusers }} Active Users</h3>
     <ul>
         <li *ngFor="let message of messages">{{ message }}</li>

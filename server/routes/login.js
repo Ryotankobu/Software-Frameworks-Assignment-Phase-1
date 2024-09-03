@@ -1,86 +1,115 @@
 module.exports = {
   route: (app) => {
-    class User {
-      constructor(username, birthday, age, email, password, valid, canCreateGroup) {
-        this.username = username;
-        this.birthday = birthday;
-        this.age = age;
-        this.email = email;
-        this.password = password;
-        this.valid = valid;
-        this.canCreateGroup = canCreateGroup;
-      }
+   class User {
+     constructor(
+       username,
+       birthday,
+       age,
+       email,
+       password,
+       valid,
+       canCreateGroup,
+       groups = []
+     ) {
+       this.username = username;
+       this.birthday = birthday;
+       this.age = age;
+       this.email = email;
+       this.password = password;
+       this.valid = valid;
+       this.canCreateGroup = canCreateGroup;
+       this.groups = groups;
+     }
+   }
 
-      getUserInfo() {
-        return {
-          username: this.username,
-          birthday: this.birthday,
-          age: this.age,
-          email: this.email,
-          valid: this.valid,
-          canCreateGroup: this.canCreateGroup,
-        };
-      }
-    }
+   // Example users with assigned rooms
+   const users = [
+     new User(
+       "SuperAdmin",
+       "1980-01-01",
+       44,
+       "superadmin@example.com",
+       "password",
+       true,
+       true,
+       ["room1", "room2"]
+     ),
+     new User(
+       "GroupAdmin",
+       "1990-01-01",
+       34,
+       "groupadmin@example.com",
+       "password",
+       true,
+       true,
+       ["room1", "room2"]
+     ),
+     new User(
+       "ChatUser",
+       "2000-01-01",
+       24,
+       "chatuser@example.com",
+       "password",
+       true,
+       false,
+       ["room2", "room3"]
+     ),
+   ];
 
-    const users = [
-      new User("Ryota", "1987-08-18", 37, "ryota@gmail.com", "Ryota", true, true),
-      new User("Kaisyu", "1995-02-05", 24, "kaisyu@gmail.com", "Kaisyu", true, false),
-      new User("Natsumi","1995-04-06", 29, "natsumi@gmail.com", "Natsumi", true, true),
-    ];
 
-    app.post("/api/auth", (req, res) => {
-      const { email, password } = req.body;
+app.post("/api/auth", (req, res) => {
+  const { email, password } = req.body;
 
-      // Check if both email and password are provided
-      if (!email || !password) {
-        return res.status(400).json({ error: "Missing email or password" });
-      }
+  // Log received email and password
+  console.log("Received login request:", email, password);
 
-      // Find the user that matches the provided email and password
-      const user = users.find(
-        (user) => user.email === email && user.password === password
-      );
+  const user = users.find((u) => u.email === email && u.password === password);
 
-      if (user) {
-        // Convert user info to JSON string for client-side storage
-        const userInfo = JSON.stringify(user.getUserInfo());
-
-        // Send the user info back to the client (client should store it in sessionStorage)
-        res.status(200).json({ valid: true, userInfo });
-      } else {
-        // If user is not found, return valid: false
-        res.status(401).json({ valid: false, message: "Invalid credentials" });
-      }
+  if (user) {
+    console.log("User found:", user);
+    res.json({
+      valid: true,
+      userInfo: JSON.stringify({
+        username: user.username,
+        birthday: user.birthday,
+        age: user.age,
+        email: user.email,
+        password: user.password,
+        valid: user.valid,
+        canCreateGroup: user.canCreateGroup,
+        groups: user.groups,
+      }),
     });
+  } else {
+    console.log("Invalid login attempt:", email);
+    res.status(401).json({
+      valid: false,
+      message: "Invalid email or password",
+    });
+  }
+});
 
 
-    app.post("/api/create-group", (req, res) => {
-      const { email, groupName } = req.body;
 
-      // Find the user by email
-      const user = users.find((user) => user.email === email);
 
-      if (!user) {
-        return res
-          .status(404)
-          .json({ valid: false, message: "User not found" });
-      }
+    app.post("/api/creategroup", (req, res) => {
+      const { user, groupName } = req.body;
 
       if (!user.canCreateGroup) {
         return res
           .status(403)
-          .json({
-            valid: false,
-            message: "You do not have permission to create groups",
-          });
+          .json({ message: "You do not have permission to create a group." });
       }
 
-      // Logic to create the group...
-      res
-        .status(200)
-        .json({ valid: true, message: "Group created successfully" });
-    });
+      // Logic to create the group, add it to the user's groups, etc.
+      user.groups.push(groupName);
 
+      res
+        .status(201)
+        .json({
+          message: `Group ${groupName} created successfully!`,
+          groups: user.groups,
+        });
+    });
   },
 };

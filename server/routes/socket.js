@@ -177,6 +177,7 @@ module.exports = function (io) {
 
     // Handle room creation
     socket.on("newroom", (newroom) => {
+      console.log("New room creation request:", newroom);
       if (!rooms.includes(newroom)) {
         rooms.push(newroom);
         chat.emit("roomlist", JSON.stringify(rooms));

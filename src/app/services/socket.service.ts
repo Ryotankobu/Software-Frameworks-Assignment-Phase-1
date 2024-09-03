@@ -15,7 +15,8 @@ export class SocketService {
     this.socket = io(SERVER_URL);
   }
 
-  joinroom(selroom: string): void {
+   joinroom(selroom: string): void {
+    console.log('Joining room:', selroom);
     this.socket.emit("joinRoom", selroom);
   }
 
@@ -27,7 +28,8 @@ export class SocketService {
     this.socket.on('joined', (res: any) => next(res));
   }
 
-  createroom(newroom: string): void {
+createroom(newroom: string): void {
+    console.log('Creating room:', newroom);
     this.socket.emit('newroom', newroom);
   }
 
@@ -40,11 +42,15 @@ export class SocketService {
   }
 
   reqroomList(): void {
+    console.log('Requesting room list');
     this.socket.emit('roomlist', 'list please');
   }
 
   getroomList(next: (res: any) => void): void {
-    this.socket.on('roomlist', (res: any) => next(res));
+    this.socket.on('roomlist', (res: any) => {
+      console.log('Received room list:', res);
+      next(res);
+    });
   }
 
   notice(next: (res: any) => void): void {
