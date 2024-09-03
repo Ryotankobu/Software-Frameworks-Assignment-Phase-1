@@ -7,13 +7,13 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Add FormsModule here
+  imports: [CommonModule, FormsModule],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
   private socket: any;
-  messageContent: string = ""; // Use consistent naming
+  messageContent: string = "";
   messages: string[] = [];
   rooms: any[] = [];
   roomslist: string = "";
@@ -22,12 +22,23 @@ export class ChatComponent implements OnInit {
   isinRoom = false;
   newroom: string = "";
   numusers: number = 0;
-
+  canCreateGroup: boolean = false; 
   user: any;
 
-  constructor(private socketservice: SocketService, private router: Router) { }
+  constructor(private socketservice: SocketService, private router: Router) {}
 
   ngOnInit() {
+    const currentUserData = sessionStorage.getItem('current_user');
+    if (currentUserData) {
+      const currentUser = JSON.parse(currentUserData);
+      this.canCreateGroup = currentUser.canCreateGroup;
+      this.user = currentUser;
+    } else {
+      console.error('No current user found in session storage');
+      this.router.navigate(['/login']);
+      return; // Exit the function to prevent further execution
+    }
+
     this.socketservice.initSocket();
     this.socketservice.getMessage((m) => { this.messages.push(m) });
     this.socketservice.reqroomList();
@@ -37,14 +48,6 @@ export class ChatComponent implements OnInit {
       this.currentroom = msg;
       this.isinRoom = this.currentroom !== "";
     });
-
-const userData = sessionStorage.getItem('current_user');
-    if (userData) {
-      this.user = JSON.parse(userData);
-    } else {
-      window.location.href = '/login';
-    }
-    
   }
 
   joinroom() {
@@ -68,13 +71,6 @@ const userData = sessionStorage.getItem('current_user');
     this.messages = [];
   }
 
-  createroom() {
-    console.log(this.newroom);
-    this.socketservice.createroom(this.newroom);
-    this.socketservice.reqroomList();
-    this.newroom = "";
-  }
-
   chat() {
     if (this.messageContent) {
       this.socketservice.sendMessage(this.messageContent);
@@ -84,8 +80,19 @@ const userData = sessionStorage.getItem('current_user');
     }
   }
 
-   backLogin(){
-    this.router.navigate(['/login']);
+  createroom() {
+    if (!this.canCreateGroup) {
+      console.log('You do not have permission to create a group.');
+      return;
+    }
 
+    console.log(this.newroom);
+    this.socketservice.createroom(this.newroom);
+    this.socketservice.reqroomList();
+    this.newroom = "";
+  }
+
+  backLogin() {
+    this.router.navigate(['/login']);
   }
 }

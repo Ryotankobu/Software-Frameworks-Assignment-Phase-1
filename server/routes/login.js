@@ -1,13 +1,14 @@
 module.exports = {
   route: (app) => {
     class User {
-      constructor(username, birthday, age, email, password, valid) {
+      constructor(username, birthday, age, email, password, valid, canCreateGroup) {
         this.username = username;
         this.birthday = birthday;
         this.age = age;
         this.email = email;
         this.password = password;
         this.valid = valid;
+        this.canCreateGroup = canCreateGroup;
       }
 
       getUserInfo() {
@@ -17,21 +18,15 @@ module.exports = {
           age: this.age,
           email: this.email,
           valid: this.valid,
+          canCreateGroup: this.canCreateGroup,
         };
       }
     }
 
     const users = [
-      new User("Ryota", "1987-08-18", 37, "ryota@gmail.com", "Ryota", true),
-      new User("Jam", "2000-08-30", 24, "jam@icloud.com", "Jam", true),
-      new User(
-        "Nakajima",
-        "1975-04-05",
-        55,
-        "Nakajima@icloud.com",
-        "Nakajima",
-        true
-      ),
+      new User("Ryota", "1987-08-18", 37, "ryota@gmail.com", "Ryota", true, true),
+      new User("Kaisyu", "1995-02-05", 24, "kaisyu@gmail.com", "Kaisyu", true, false),
+      new User("Natsumi","1995-04-06", 29, "natsumi@gmail.com", "Natsumi", true, true),
     ];
 
     app.post("/api/auth", (req, res) => {
@@ -58,5 +53,34 @@ module.exports = {
         res.status(401).json({ valid: false, message: "Invalid credentials" });
       }
     });
+
+
+    app.post("/api/create-group", (req, res) => {
+      const { email, groupName } = req.body;
+
+      // Find the user by email
+      const user = users.find((user) => user.email === email);
+
+      if (!user) {
+        return res
+          .status(404)
+          .json({ valid: false, message: "User not found" });
+      }
+
+      if (!user.canCreateGroup) {
+        return res
+          .status(403)
+          .json({
+            valid: false,
+            message: "You do not have permission to create groups",
+          });
+      }
+
+      // Logic to create the group...
+      res
+        .status(200)
+        .json({ valid: true, message: "Group created successfully" });
+    });
+
   },
 };
