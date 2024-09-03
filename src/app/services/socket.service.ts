@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import io from 'socket.io-client';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 const SERVER_URL = 'http://localhost:3000/chat';
+const BACKEND_URL = 'http://localhost:3000';
+const httpOptions = {
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+};
 
 @Injectable({
   providedIn: 'root'
@@ -9,13 +15,13 @@ const SERVER_URL = 'http://localhost:3000/chat';
 export class SocketService {
   private socket: any;
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   initSocket(): void {
     this.socket = io(SERVER_URL);
   }
 
-   joinroom(selroom: string): void {
+  joinroom(selroom: string): void {
     console.log('Joining room:', selroom);
     this.socket.emit("joinRoom", selroom);
   }
@@ -28,10 +34,17 @@ export class SocketService {
     this.socket.on('joined', (res: any) => next(res));
   }
 
-createroom(newroom: string): void {
+  createroom(newroom: string): void {
     console.log('Creating room:', newroom);
     this.socket.emit('newroom', newroom);
   }
+
+  deleteGroup(data: any) {
+    return this.http.post(`${BACKEND_URL}/api/deletegroup`, data, {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    });
+  }
+
 
   reqnumbers(selroom: string): void {
     this.socket.emit("numbers", selroom);

@@ -109,6 +109,28 @@ setupSocketListeners() {
     }
   }
 
+deleteGroup(groupName: string) {
+  const currentUserData = sessionStorage.getItem('current_user');
+  if (currentUserData) {
+    const user = JSON.parse(currentUserData);
+    const requestBody = { email: user.email, groupName: groupName };
+
+    this.socketservice.deleteGroup(requestBody).subscribe(
+      (response) => {
+        console.log('Group deleted successfully:', response);
+        this.rooms = this.rooms.filter(room => room !== groupName); // Remove the deleted group from the displayed list
+      },
+      (error) => {
+        console.error('Error deleting group:', error);
+      }
+    );
+  } else {
+    console.error('No current user found in session storage');
+  }
+}
+
+
+
   chat() {
     if (this.messageContent) {
       this.socketservice.sendMessage(this.messageContent);

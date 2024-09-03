@@ -91,7 +91,7 @@ app.post("/api/auth", (req, res) => {
 
 
 
-
+// backend of group creation
     app.post("/api/creategroup", (req, res) => {
       const { user, groupName } = req.body;
 
@@ -111,5 +111,37 @@ app.post("/api/auth", (req, res) => {
           groups: user.groups,
         });
     });
+
+
+
+    // backend of group delete
+  app.post("/api/deletegroup", (req, res) => {
+    const { email, groupName } = req.body;
+
+    const user = users.find((u) => u.email === email);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.canCreateGroup) {
+      return res
+        .status(403)
+        .json({ message: "You do not have permission to delete a group." });
+    }
+
+    const groupIndex = user.groups.indexOf(groupName);
+    if (groupIndex === -1) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    // Remove the group from the user's groups
+    user.groups.splice(groupIndex, 1);
+
+    res.status(200).json({
+      message: `Group ${groupName} deleted successfully!`,
+      groups: user.groups,
+    });
+  });
+
   },
 };
