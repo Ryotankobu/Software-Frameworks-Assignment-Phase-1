@@ -77,4 +77,9 @@ export class SocketService {
   getMessage(next: (message: any) => void): void {
     this.socket.on('message', (message: any) => next(message));
   }
+
+assignRoom(requestBody: any) {
+  return this.http.post(`${BACKEND_URL}/api/assignroom`, requestBody, httpOptions);
+}
+
 }

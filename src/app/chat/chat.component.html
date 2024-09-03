@@ -28,6 +28,12 @@
                 <button *ngIf="canCreateGroup" (click)="deleteGroup(room)">Delete</button>
             </li>
         </ul>
+    <div *ngIf="canCreateGroup">
+        <h3>Assign Room to User</h3>
+        <input [(ngModel)]="targetUserEmail" name="targetUserEmail" placeholder="Enter user email">
+        <input [(ngModel)]="roomToAssign" name="roomToAssign" placeholder="Enter room name">
+        <button (click)="assignRoomToUser()">Assign Room</button>
+    </div>
 
     </form>
 

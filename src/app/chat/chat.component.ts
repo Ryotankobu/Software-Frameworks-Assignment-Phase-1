@@ -25,6 +25,10 @@ export class ChatComponent implements OnInit {
   canCreateGroup: boolean = false; 
   user: any;
 
+  // For assigning rooms
+  targetUserEmail: string = "";
+  roomToAssign: string = "";
+
   constructor(private socketservice: SocketService, private router: Router) { }
 
 ngOnInit() {
@@ -65,16 +69,36 @@ setupSocketListeners() {
 
 
 
+  // joinroom() {
+  //   if (this.roomslist && this.user.groups.includes(this.roomslist)) {
+  //     this.socketservice.joinroom(this.roomslist);
+  //     this.socketservice.reqnumbers(this.roomslist);
+  //     this.socketservice.getnumusers((res) => { this.numusers = res; });
+  //   } else {
+  //     console.error("You do not have access to this room.");
+  //     this.roomnotice = "Access Denied: You do not have access to this room.";
+  //   }
+  // }
   joinroom() {
-    if (this.roomslist && this.user.groups.includes(this.roomslist)) {
-      this.socketservice.joinroom(this.roomslist);
-      this.socketservice.reqnumbers(this.roomslist);
-      this.socketservice.getnumusers((res) => { this.numusers = res; });
-    } else {
-      console.error("You do not have access to this room.");
-      this.roomnotice = "Access Denied: You do not have access to this room.";
-    }
+  if (!this.roomslist) {
+    console.error("No room selected.");
+    this.roomnotice = "Please select a room to join.";
+    return;
   }
+
+  if (this.user.groups.includes(this.roomslist)) {
+    this.socketservice.joinroom(this.roomslist);
+    this.socketservice.reqnumbers(this.roomslist);
+    this.socketservice.getnumusers((res) => {
+      this.numusers = res;
+    });
+    this.roomnotice = ""; // Clear any previous notices if the room is joined successfully
+  } else {
+    console.error("You do not have access to this room.");
+    this.roomnotice = "Access Denied: You do not have access to this room.";
+  }
+}
+
 
   clearnotice() {
     this.roomnotice = "";
@@ -143,4 +167,37 @@ deleteGroup(groupName: string) {
   backLogin() {
     this.router.navigate(['/login']);
   }
+
+assignRoomToUser() {
+  const currentUserData = sessionStorage.getItem('current_user');
+  if (currentUserData) {
+    const user = JSON.parse(currentUserData);
+    const requestBody = {
+      email: this.targetUserEmail.trim(),  
+      roomName: this.roomToAssign.trim(),  
+    };
+
+    if (!requestBody.email || !requestBody.roomName) {
+      console.error('Email or room name is missing.');
+      this.roomnotice = 'Please provide both email and room name.';
+      return;
+    }
+
+    this.socketservice.assignRoom(requestBody).subscribe(
+      (response) => {
+        console.log('Room assigned successfully:', response);
+        this.roomnotice = `Room ${requestBody.roomName} assigned to ${requestBody.email}.`;
+      },
+      (error) => {
+        console.error('Error assigning room:', error);
+        this.roomnotice = 'Failed to assign room. Please try again.';
+      }
+    );
+  } else {
+    console.error('No current user found in session storage');
+    this.roomnotice = 'Session expired. Please log in again.';
+  }
+}
+
+
 }

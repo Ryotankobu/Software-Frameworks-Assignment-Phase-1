@@ -143,5 +143,40 @@ app.post("/api/auth", (req, res) => {
     });
   });
 
+
+
+  // room assign for a specific user
+      app.post("/api/assignroom", (req, res) => {
+        const { email, roomName } = req.body;
+
+        if (!email || !roomName) {
+          return res
+            .status(400)
+            .json({ message: "Email and room name are required" });
+        }
+
+        const user = users.find((u) => u.email === email);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.groups.includes(roomName)) {
+          return res
+            .status(400)
+            .json({ message: "User already assigned to this room" });
+        }
+
+        // Add the room to the user's groups
+        user.groups.push(roomName);
+
+        res
+          .status(200)
+          .json({
+            message: `Room ${roomName} assigned to user ${email} successfully`,
+            groups: user.groups,
+          });
+          console.log("now this user belongs to", user.groups);
+      });
+
   },
 };
