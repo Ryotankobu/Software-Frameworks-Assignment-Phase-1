@@ -29,7 +29,7 @@ module.exports = {
        "1980-01-01",
        44,
        "superadmin@example.com",
-       "password",
+       "123",
        true,
        true,
        ["room1", "room2"]
@@ -39,7 +39,7 @@ module.exports = {
        "1990-01-01",
        34,
        "groupadmin@example.com",
-       "password",
+       "123",
        true,
        true,
        ["room1", "room2"]
@@ -49,7 +49,7 @@ module.exports = {
        "2000-01-01",
        24,
        "chatuser@example.com",
-       "password",
+       "123",
        true,
        false,
        ["room2", "room3"]
@@ -58,12 +58,14 @@ module.exports = {
 
 
 app.post("/api/auth", (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  // Log received email and password
-  console.log("Received login request:", email, password);
+  // Log received SuperAdmin and password
+  console.log("Received login request:", username, password);
 
-  const user = users.find((u) => u.email === email && u.password === password);
+  const user = users.find(
+    (u) => u.username === username && u.password === password
+  );
 
   if (user) {
     console.log("User found:", user);
@@ -81,10 +83,10 @@ app.post("/api/auth", (req, res) => {
       }),
     });
   } else {
-    console.log("Invalid login attempt:", email);
+    console.log("Invalid login attempt:", username);
     res.status(401).json({
       valid: false,
-      message: "Invalid email or password",
+      message: "Invalid username or password",
     });
   }
 });

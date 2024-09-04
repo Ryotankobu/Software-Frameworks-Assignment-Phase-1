@@ -17,7 +17,7 @@
 
 /* Input field styling */
 input[type="text"],
-input[type="email"],
+input[type="username"],
 input[type="password"],
 select {
     width: calc(90% - 20px);
