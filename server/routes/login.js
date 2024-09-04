@@ -25,7 +25,7 @@ module.exports = {
    // Example users with assigned rooms
    const users = [
      new User(
-       "SuperAdmin",
+       "super",
        "1980-01-01",
        44,
        "superadmin@example.com",
